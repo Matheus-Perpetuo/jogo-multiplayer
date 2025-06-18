@@ -7,8 +7,13 @@ export default function createGame() {
             height: 10
         }
     }
-
     const observers = []
+
+    function start() {
+        const frequency = 6000
+
+        setInterval(addFruit, frequency)
+    }
 
      function subscribe(observerFunction) {
         observers.push(observerFunction)
@@ -53,23 +58,38 @@ export default function createGame() {
     }
 
     function addFruit(command) {
-        const fruitId = command.fruitId
-        const fruitX = command.fruitX
-        const fruitY = command.fruitY
+        const fruitId = command ? command.fruitId : Math.floor(Math.random() * 10000000)
+        const fruitX = command ? command.fruitX : Math.floor(Math.random() * state.screen.width)
+        const fruitY = command ? command.fruitY : Math.floor(Math.random() * state.screen.height)
 
         state.fruits[fruitId] = {
             x: fruitX,
             y: fruitY
         }
+
+         notifyAll({
+            type: 'add-fruit',
+            fruitId: fruitId,
+            fruitX: fruitX,
+            fruitY: fruitY
+        })
     }
 
     function removeFruit(command) {
         const fruitId = command.fruitId
 
         delete state.fruits[fruitId]
+
+         notifyAll({
+            type: 'remove-fruit',
+            fruitId: fruitId,
+            
+        })
     }
 
     function movePlayer(command) {
+        notifyAll(command)
+
         const acceptedMoves = {
             ArrowUp(player) {
                 if (player.y - 1 >= 0) {
@@ -130,6 +150,7 @@ export default function createGame() {
         removeFruit,
         state,
         setState,
-        subscribe
+        subscribe,
+        start
     }
 }
